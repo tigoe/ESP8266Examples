@@ -4,7 +4,7 @@
   to the serial port
 
   note: the header file "settings.h" is not included in this repository.
-  Include the following variables:
+  Add a new tab in Arduino, call it "settings.h", and Include the following variables:
   char ssid[]     = "ssid";     // your network SSID
   char password[] = "password"; // your network password
   char host[] = "192.168.0.2";  // the IP address of the device running the server
