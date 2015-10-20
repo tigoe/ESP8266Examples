@@ -9,8 +9,11 @@
   char password[] = "password"; // your network password
   char host[] = "192.168.0.2";  // the IP address of the device running the server
 
+  You need to run a telnet server on port 8080 of the host to talk to this
+  sketch.
+
   created 26 Jun 2015
-  modified 8 Jul 2015
+  modified 20 Oct 2015
   by Tom Igoe
 
  */
@@ -18,17 +21,16 @@
 #include <ESP8266WiFi.h>
 #include "settings.h"
 
-WiFiClient client;
+WiFiClient socket;
 const int port = 8080;
 
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(10);
-  client.setTimeout(10);
+  socket.setTimeout(10);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to ");   // connect to access point
-  Serial.println(ssid);
-  
+  // wait for connection to network access point:
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -38,42 +40,46 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP()); // print device's IP address
-  delay(100);
   login();                        // log into the server
 }
 
 
 void loop() {
-  // Read all the lines of the reply from server and print them to Serial
-  while (client.available()) {
+  // Read all the lines of the reply from server 
+  // and print them to Serial"
+  while (socket.available()) {
     Serial.print("Got something");
-    String line = client.readStringUntil('\n');
-    Serial.print(line);
+    String input = socket.readStringUntil('\n');
+    Serial.println(input);
   }
 
-  // Read all the lines of the reply from serial and print them to server
+  // Read all the lines of the reply from serial 
+  // and print them to server:
   while (Serial.available()) {
-    String line = Serial.readStringUntil('\n');
-    client.print(line);
+    String output = Serial.readStringUntil('\n');
+    socket.println(output);
   }
 
-  
-  if (!client.connected()) {
-    delay(1000);
-    login();
+  if (millis() % 1000 < 5)  {   // if one second has passed,
+    if (!socket.connected()) {  // check connection
+      login();                  // if not connected, login
+    }
   }
 }
 
 boolean login() {
-  client.connect(host, port);
-  delay(1000);
-  while (!client.connected()) {
-    Serial.println("connection failed, trying again");
+  socket.connect(host, port);   // attempt to connect
+
+  while (!socket.connected()) { // While not connected, try again
     delay(2000);
-    client.connect(host, port);
+    if (socket.connected()) {   // if you connected,
+      socket.println("hello");  // say hello to the server
+    } else {
+      // if not connected, try again:
+      Serial.println("connection failed, trying again");
+      socket.connect(host, port);
+    }
   }
-  // This will send the IP address to the server
-  client.println("Hello");
 }
 
 
