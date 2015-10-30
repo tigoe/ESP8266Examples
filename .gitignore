@@ -1,2 +1,4 @@
 
 ESPWifiTelnetClient/settings.h
+
+ESP-to-ATTiny-TelnetClient/ESPSerialToTelnetClient/settings.h
